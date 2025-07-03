@@ -1,5 +1,4 @@
-// src/App.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
 import ConnectWallet from "./components/ConnectWallet";
@@ -9,33 +8,43 @@ import Footer from "./components/Footer";
 import AboutSection from "./components/AboutSection";
 import "./styles.css";
 
+const quotes = [
+  "Your Bitcoin, your future 💡",
+  "HODL your BTC, borrow smart 💰",
+  "Decentralized. Transparent. Secure 🔒",
+  "Let your Bitcoin work for you 🚀",
+  "No banks. Just code. 🧠"
+];
+
 function App() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [loans, setLoans] = useState([]);
-  const [theme, setTheme] = useState("dark"); // Default to dark
+  const [theme, setTheme] = useState("dark");
   const [showAbout, setShowAbout] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [showQuote, setShowQuote] = useState(true);
 
-  // Toggle light/dark theme
+  // Theme toggle
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  // Toggle About section
+  // About toggle
   const toggleAbout = () => {
     setShowAbout((prev) => !prev);
   };
 
-  // Handle wallet connection
+  // Wallet connect
   const connectWallet = (principal) => {
     setWalletAddress(principal.toText());
   };
 
-  // Handle wallet disconnect
+  // Wallet disconnect
   const disconnectWallet = () => {
     setWalletAddress(null);
   };
 
-  // Handle new loan
+  // Add new loan
   const handleNewLoan = (loan) => {
     const newLoan = {
       ...loan,
@@ -45,19 +54,29 @@ function App() {
     setLoans([...loans, newLoan]);
   };
 
-  // Handle loan repayment
+  // Repay loan
   const handleRepayLoan = (loanId) => {
     const updatedLoans = loans.filter((loan) => loan.id !== loanId);
     setLoans(updatedLoans);
   };
 
+  // Quote rotation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % quotes.length);
+      setShowQuote(true);
+
+      setTimeout(() => {
+        setShowQuote(false);
+      }, 20000);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className={`App ${theme}`}>
-      <Header
-        toggleTheme={toggleTheme}
-        theme={theme}
-        onAboutClick={toggleAbout}
-      />
+      <Header toggleTheme={toggleTheme} theme={theme} onAboutClick={toggleAbout} />
 
       {showAbout && (
         <div className="about-overlay">
@@ -85,6 +104,13 @@ function App() {
           </p>
         )}
       </div>
+
+      {/* Sliding Quote Box */}
+      {showQuote && (
+        <div className="quote-box slide-in-left">
+          {quotes[quoteIndex]}
+        </div>
+      )}
 
       <Footer />
     </div>
